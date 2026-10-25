@@ -22,3 +22,9 @@ create index if not exists bids_day_status on bids (day, status);
 -- Al massimo un'offerta in testa per giorno.
 create unique index if not exists bids_one_leader on bids (day) where status = 'leading';
 create unique index if not exists bids_one_winner on bids (day) where status = 'won';
+
+-- Lista d'attesa della pagina con il conto alla rovescia.
+create table if not exists waitlist (
+  email text primary key,
+  created_at timestamptz not null default now()
+);

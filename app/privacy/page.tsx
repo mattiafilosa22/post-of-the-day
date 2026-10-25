@@ -17,6 +17,7 @@ export default function Privacy() {
       <h2>What we collect</h2>
       <ul>
         <li>Name or company, tagline and link: you enter them, and they are shown publicly with the amount you bid.</li>
+        <li>Email for the launch list, if you sign up on the countdown page: used once to send you the launch link, then deleted.</li>
         <li>Email and payment details: Stripe collects them at checkout. We never see your card number.</li>
         <li>Minimal technical data needed to run the site (server logs). No tracking or profiling cookies.</li>
       </ul>

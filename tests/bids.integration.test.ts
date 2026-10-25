@@ -75,6 +75,15 @@ describe.skipIf(!url)("ciclo di vita delle offerte (Postgres)", async () => {
     expect(await bids.getWinner(addDays(day, 1))).toBeNull();
   });
 
+  it("la lista d'attesa non duplica le email", async () => {
+    const { joinWaitlist, waitlistCount } = await import("@/lib/waitlist");
+    await sql()`delete from waitlist`;
+    expect(await joinWaitlist("a@example.com")).toBe(true);
+    expect(await joinWaitlist("a@example.com")).toBe(false);
+    expect(await waitlistCount()).toBe(1);
+    await sql()`delete from waitlist`;
+  });
+
   it("la moderazione toglie l'offerta in testa e rilascia il blocco", async () => {
     const id = await authorizedBid("anna", 10);
     expect(await bids.rejectLeadingBid(id)).toBe(true);

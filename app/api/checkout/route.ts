@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { CURRENCY, MAX_BID_CENTS, formatMoney, minNextBidCents, parseAmountToCents } from "@/lib/auction";
 import { attachSession, createPendingBid, getLeader } from "@/lib/bids";
+import { isPrelaunch } from "@/lib/launch";
 import { parsePostLink } from "@/lib/links";
 import { siteUrl, stripe } from "@/lib/stripe";
 import { formatDay, openAuctionDay } from "@/lib/time";
@@ -12,6 +13,8 @@ function fail(error: string, status = 400) {
 }
 
 export async function POST(req: Request) {
+  if (isPrelaunch()) return fail("Bidding opens at launch.", 403);
+
   let body: Record<string, unknown>;
   try {
     body = await req.json();

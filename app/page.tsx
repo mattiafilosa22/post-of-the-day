@@ -3,8 +3,10 @@ import { Countdown } from "./components/Countdown";
 import { Footer } from "./components/Footer";
 import { Masthead } from "./components/Masthead";
 import { PostEmbed } from "./components/PostEmbed";
+import { Prelaunch } from "./components/Prelaunch";
 import { formatMoney } from "@/lib/auction";
 import { loadFrontPage } from "@/lib/frontpage";
+import { isPrelaunch, launchAt } from "@/lib/launch";
 import { formatDay } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +14,8 @@ export const dynamic = "force-dynamic";
 const timeFmt = new Intl.DateTimeFormat("en-US", { timeZone: "UTC", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 
 export default async function Home() {
+  if (isPrelaunch()) return <Prelaunch launchAt={launchAt()} />;
+
   const fp = await loadFrontPage();
 
   return (

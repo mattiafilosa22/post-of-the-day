@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { formatMoney } from "@/lib/auction";
 import { getLeader } from "@/lib/bids";
+import { isPrelaunch, launchAt } from "@/lib/launch";
 import { formatDay, openAuctionDay } from "@/lib/time";
 
 export const alt = "The Post of the Day";
@@ -24,9 +25,12 @@ async function loadFont(family: string, axes: string): Promise<ArrayBuffer | nul
   }
 }
 
+const launchFmt = new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", month: "long", day: "numeric" });
+
 export default async function Image() {
   const day = openAuctionDay();
-  const leader = process.env.DATABASE_URL ? await getLeader(day).catch(() => null) : null;
+  const prelaunch = isPrelaunch();
+  const leader = process.env.DATABASE_URL && !prelaunch ? await getLeader(day).catch(() => null) : null;
   const [serif, serifItalic, sans, sansBold] = await Promise.all([
     loadFont("Newsreader", "wght@600"),
     loadFont("Newsreader", "ital,wght@1,400"),
@@ -39,6 +43,23 @@ export default async function Image() {
     ...(sans ? [{ name: "Schibsted", data: sans, weight: 400 as const, style: "normal" as const }] : []),
     ...(sansBold ? [{ name: "Schibsted", data: sansBold, weight: 700 as const, style: "normal" as const }] : []),
   ];
+
+  if (prelaunch) {
+    return new ImageResponse(
+      (
+        <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#141210", color: "#f1ede6", fontFamily: "Newsreader" }}>
+          <div style={{ display: "flex", fontSize: 40, color: "#a59f95" }}>
+            <span>The&nbsp;</span>
+            <span style={{ fontStyle: "italic", fontWeight: 400 }}>Post</span>
+            <span>&nbsp;of the Day</span>
+          </div>
+          <div style={{ display: "flex", fontSize: 150, fontWeight: 600, letterSpacing: -4, marginTop: 24 }}>{launchFmt.format(launchAt())}</div>
+          <div style={{ display: "flex", fontSize: 34, fontStyle: "italic", marginTop: 24 }}>One spot. One day. Only the winner pays.</div>
+        </div>
+      ),
+      { ...size, fonts },
+    );
+  }
 
   return new ImageResponse(
     (
