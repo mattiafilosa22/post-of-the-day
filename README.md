@@ -30,3 +30,9 @@ Senza `DATABASE_URL`, in sviluppo la home mostra dati di esempio, utile per lavo
 ```bash
 npm test
 ```
+
+I test sul ciclo di vita delle offerte (`tests/bids.integration.test.ts`) girano solo con un Postgres di prova, con Stripe simulato:
+
+```bash
+TEST_DATABASE_URL=postgres://utente@localhost:5432/test npm test
+```
