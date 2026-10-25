@@ -1,7 +1,7 @@
 import { sql } from "./db";
 import { stripe } from "./stripe";
 import { decideOnAuthorized } from "./auction";
-import { romeDay } from "./time";
+import { today as currentDay } from "./time";
 
 export type BidStatus = "pending" | "leading" | "outbid" | "won" | "rejected" | "failed";
 
@@ -84,7 +84,7 @@ async function releaseHold(paymentIntentId: string | null): Promise<void> {
 
 // Chiamata dal webhook quando Stripe ha bloccato l'importo sulla carta.
 export async function handleAuthorized(sessionId: string, paymentIntentId: string): Promise<void> {
-  const today = romeDay();
+  const today = currentDay();
   const toRelease = await sql().begin(async (tx) => {
     const [bid] = await tx.unsafe<Bid[]>(
       `select ${COLUMNS} from bids where stripe_session_id = $1 for update`,
@@ -123,7 +123,7 @@ export async function handleAuthorized(sessionId: string, paymentIntentId: strin
 
 // Incassa l'offerta in testa di ogni giorno già iniziato. Si può chiamare più volte.
 export async function closeDueAuctions(now: Date = new Date()): Promise<number> {
-  const today = romeDay(now);
+  const today = currentDay(now);
   const due = await sql()<{ day: string }[]>`
     select distinct to_char(day, 'YYYY-MM-DD') as day from bids
     where status = 'leading' and day <= ${today}`;

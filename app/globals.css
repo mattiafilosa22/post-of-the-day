@@ -208,3 +208,7 @@ a:hover { color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }
+
+.x-embed { min-height: 12rem; }
+.x-embed .twitter-tweet { margin: 0 !important; }
+.x-embed blockquote { border-left: 2px solid var(--rule); margin: 0; padding: 1rem 1.25rem; }

@@ -1,6 +1,6 @@
 import { minNextBidCents } from "./auction";
 import { closeDueAuctions, getLeader, getWinner, listAuthorizedBids, listPastWinners, type Bid } from "./bids";
-import { openAuctionDay, romeDay, romeMidnight } from "./time";
+import { dayStart, openAuctionDay, today as currentDay } from "./time";
 
 export type FrontPage = {
   today: string;
@@ -15,9 +15,9 @@ export type FrontPage = {
 };
 
 export async function loadFrontPage(now: Date = new Date()): Promise<FrontPage> {
-  const today = romeDay(now);
+  const today = currentDay(now);
   const auctionDay = openAuctionDay(now);
-  const closesAt = romeMidnight(auctionDay).toISOString();
+  const closesAt = dayStart(auctionDay).toISOString();
 
   if (!process.env.DATABASE_URL && process.env.NODE_ENV !== "production") {
     return demoFrontPage(today, auctionDay, closesAt);
@@ -62,27 +62,30 @@ function demoFrontPage(today: string, auctionDay: string, closesAt: string): Fro
     authorized_at: new Date(Date.now() - i * 41 * 60000),
     ...p,
   });
-  const leader = bid(1, { name: "Giulia Ferri", headline: "Head of Growth, Milano", amount_cents: 4700, status: "leading" });
+  const leader = bid(1, {
+    name: "Priya Raman", headline: "Building a calm inbox, solo", amount_cents: 4700, status: "leading",
+    post_url: "https://x.com/priya/status/1849000000000000001",
+  });
   return {
     today,
     auctionDay,
     closesAt,
     featured: bid(0, {
-      day: today, name: "Studio Arcangeli", headline: "Architettura e interni, Bologna",
-      amount_cents: 3900, status: "won", post_url: "https://www.linkedin.com/posts/demo",
+      day: today, name: "Tomás Herrera", headline: "Indie hacker, Buenos Aires",
+      amount_cents: 3900, status: "won", post_url: "https://x.com/tomas/status/1848000000000000001",
     }),
     leader,
     minNextCents: minNextBidCents(leader.amount_cents),
     bids: [
       leader,
-      bid(2, { name: "Marco De Santis", headline: "Sviluppatore freelance", amount_cents: 4200 }),
-      bid(3, { name: "Officina Nove", amount_cents: 2500 }),
-      bid(4, { name: "Sara L.", headline: "Recruiter tech", amount_cents: 1200 }),
+      bid(2, { name: "Jonas Weber", headline: "Shipping a tiny SaaS a month", amount_cents: 4200 }),
+      bid(3, { name: "Nine Studio", amount_cents: 2500, post_url: "https://ninestudio.example/launch" }),
+      bid(4, { name: "Amelia K.", headline: "Recruiting for climate startups", amount_cents: 1200 }),
     ],
     archive: [
-      bid(5, { day: "2026-10-24", name: "Luca Morandi", headline: "Founder, Napoli", amount_cents: 3100, status: "won" }),
-      bid(6, { day: "2026-10-23", name: "Elena Conti", amount_cents: 1800, status: "won" }),
-      bid(7, { day: "2026-10-22", name: "Pixel & Co.", headline: "Agenzia digitale", amount_cents: 900, status: "won" }),
+      bid(5, { day: "2026-10-24", name: "Luca Moretti", headline: "Founder, Napoli", amount_cents: 3100, status: "won" }),
+      bid(6, { day: "2026-10-23", name: "Hana Sato", amount_cents: 1800, status: "won" }),
+      bid(7, { day: "2026-10-22", name: "Pixel & Co.", headline: "Design agency", amount_cents: 900, status: "won" }),
     ],
     demo: true,
   };

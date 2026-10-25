@@ -1,9 +1,9 @@
 import { ImageResponse } from "next/og";
-import { formatEuro } from "@/lib/auction";
+import { formatMoney } from "@/lib/auction";
 import { getLeader } from "@/lib/bids";
-import { formatDayIt, openAuctionDay } from "@/lib/time";
+import { formatDay, openAuctionDay } from "@/lib/time";
 
-export const alt = "Il post del giorno";
+export const alt = "The Post of the Day";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const dynamic = "force-dynamic";
@@ -44,31 +44,31 @@ export default async function Image() {
     (
       <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: PAPER, color: INK, padding: "56px 72px", fontFamily: "Newsreader" }}>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 22, color: SOFT, letterSpacing: 2, textTransform: "uppercase", fontFamily: "Schibsted" }}>
-          <span>Fondato nel 2026</span>
-          <span>Paga solo chi vince</span>
+          <span>Est. 2026</span>
+          <span>Only the winner pays</span>
         </div>
         {/* Satori non supporta i bordi "double": due filetti separati */}
         <div style={{ display: "flex", borderTop: `2px solid ${INK}`, marginTop: 16 }} />
         <div style={{ display: "flex", borderTop: `2px solid ${INK}`, marginTop: 3 }} />
-        <div style={{ display: "flex", justifyContent: "center", fontSize: 128, fontWeight: 600, letterSpacing: -3, lineHeight: 1, marginTop: 12 }}>
-          <span>Il&nbsp;</span>
-          <span style={{ fontStyle: "italic", fontWeight: 400 }}>post</span>
-          <span>&nbsp;del giorno</span>
+        <div style={{ display: "flex", justifyContent: "center", fontSize: 116, fontWeight: 600, letterSpacing: -3, lineHeight: 1, marginTop: 12 }}>
+          <span>The&nbsp;</span>
+          <span style={{ fontStyle: "italic", fontWeight: 400 }}>Post</span>
+          <span>&nbsp;of the Day</span>
         </div>
         <div style={{ display: "flex", borderTop: `2px solid ${INK}`, marginTop: 28 }} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: "auto" }}>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <span style={{ fontSize: 24, color: ACCENT, letterSpacing: 3, textTransform: "uppercase", fontFamily: "Schibsted", fontWeight: 700 }}>
-              L&apos;asta di domani
+              Bidding for tomorrow
             </span>
-            <span style={{ fontSize: 56, marginTop: 8, fontStyle: "italic" }}>{formatDayIt(day)}</span>
+            <span style={{ fontSize: 56, marginTop: 8, fontStyle: "italic" }}>{formatDay(day)}</span>
             <span style={{ fontSize: 30, color: SOFT, marginTop: 8, fontFamily: "Schibsted" }}>
-              {leader ? `In testa: ${leader.name}` : "Un solo post LinkedIn in prima pagina"}
+              {leader ? `On top: ${leader.name}` : "One post on the front page, every day"}
             </span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-            <span style={{ fontSize: 26, color: SOFT, fontFamily: "Schibsted" }}>{leader ? "Offerta più alta" : "Si parte da"}</span>
-            <span style={{ fontSize: 120, fontWeight: 600, lineHeight: 1 }}>{formatEuro(leader?.amount_cents ?? 500)}</span>
+            <span style={{ fontSize: 26, color: SOFT, fontFamily: "Schibsted" }}>{leader ? "Highest bid" : "Starting at"}</span>
+            <span style={{ fontSize: 120, fontWeight: 600, lineHeight: 1 }}>{formatMoney(leader?.amount_cents ?? 500)}</span>
           </div>
         </div>
       </div>

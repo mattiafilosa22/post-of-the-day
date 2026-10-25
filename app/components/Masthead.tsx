@@ -1,21 +1,20 @@
-import { formatDayIt, romeDay } from "@/lib/time";
+import { formatDay, today } from "@/lib/time";
 
 export function Masthead({ edition }: { edition?: string }) {
-  const today = romeDay();
   return (
     <header className="masthead">
       <div className="masthead-top">
-        <span>Fondato nel 2026</span>
-        <span>Un post, un giorno</span>
+        <span>Est. 2026</span>
+        <span>One post, one day</span>
       </div>
       <hr className="double-rule" />
       <h1 className="masthead-title">
-        Il <em>post</em> del giorno
+        The <em>Post</em> of the Day
       </h1>
       <div className="dateline">
-        <span>{formatDayIt(today)}</span>
+        <span>{formatDay(today())}</span>
         {edition ? <span>{edition}</span> : null}
-        <span>Paga solo chi vince</span>
+        <span>Only the winner pays</span>
       </div>
     </header>
   );

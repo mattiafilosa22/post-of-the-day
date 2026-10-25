@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { MAX_BID_CENTS, formatEuro, minNextBidCents, parseEuroToCents } from "@/lib/auction";
+import { CURRENCY, MAX_BID_CENTS, formatMoney, minNextBidCents, parseAmountToCents } from "@/lib/auction";
 import { attachSession, createPendingBid, getLeader } from "@/lib/bids";
-import { parseLinkedInPost } from "@/lib/linkedin";
+import { parsePostLink } from "@/lib/links";
 import { siteUrl, stripe } from "@/lib/stripe";
-import { formatDayIt, openAuctionDay } from "@/lib/time";
+import { formatDay, openAuctionDay } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 
@@ -16,24 +16,24 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch {
-    return fail("Richiesta non valida.");
+    return fail("Invalid request.");
   }
 
   const name = String(body.name ?? "").trim();
   const headline = String(body.headline ?? "").trim() || null;
-  const post = parseLinkedInPost(String(body.postUrl ?? ""));
-  const amountCents = parseEuroToCents(String(body.amount ?? ""));
+  const post = parsePostLink(String(body.postUrl ?? ""));
+  const amountCents = parseAmountToCents(String(body.amount ?? ""));
 
-  if (name.length < 2 || name.length > 60) return fail("Inserisci un nome tra 2 e 60 caratteri.");
-  if (headline && headline.length > 100) return fail("Il sottotitolo può avere al massimo 100 caratteri.");
-  if (!post) return fail("Incolla il link di un post LinkedIn pubblico.");
-  if (amountCents === null) return fail("Inserisci un importo valido, per esempio 12 o 12,50.");
+  if (name.length < 2 || name.length > 60) return fail("Enter a name between 2 and 60 characters.");
+  if (headline && headline.length > 100) return fail("The tagline can be at most 100 characters.");
+  if (!post) return fail("Paste a public https link: a post on X or LinkedIn, or any page.");
+  if (amountCents === null) return fail("Enter a valid amount, like 12 or 12.50.");
 
   const day = openAuctionDay();
   const leader = await getLeader(day);
   const min = minNextBidCents(leader?.amount_cents ?? null);
-  if (amountCents < min) return fail(`L'offerta minima ora è ${formatEuro(min)}.`);
-  if (amountCents > MAX_BID_CENTS) return fail(`L'offerta massima è ${formatEuro(MAX_BID_CENTS)}.`);
+  if (amountCents < min) return fail(`The minimum bid right now is ${formatMoney(min)}.`);
+  if (amountCents > MAX_BID_CENTS) return fail(`The maximum bid is ${formatMoney(MAX_BID_CENTS)}.`);
 
   const bidId = await createPendingBid({ day, name, headline, postUrl: post.url, amountCents });
 
@@ -44,11 +44,11 @@ export async function POST(req: Request) {
       {
         quantity: 1,
         price_data: {
-          currency: "eur",
+          currency: CURRENCY,
           unit_amount: amountCents,
           product_data: {
-            name: `Post del giorno, ${formatDayIt(day)}`,
-            description: "Addebitato solo se la tua offerta è la più alta alla mezzanotte.",
+            name: `Post of the Day, ${formatDay(day)}`,
+            description: "Charged only if yours is the highest bid at midnight UTC.",
           },
         },
       },
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     payment_intent_data: { capture_method: "manual", metadata: { bid_id: bidId, day } },
     metadata: { bid_id: bidId, day },
     expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
-    success_url: `${siteUrl()}/grazie?session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${siteUrl()}/thanks?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${siteUrl()}/`,
   });
 

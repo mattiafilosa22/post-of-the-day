@@ -24,10 +24,10 @@ export function Countdown({ endsAt }: { endsAt: string }) {
   return (
     <p className="countdown">
       {left !== null && left <= 0 ? (
-        <span>Asta chiusa. Ricarica la pagina per vedere il vincitore.</span>
+        <span>Bidding closed. Reload to see the winner.</span>
       ) : (
         <>
-          <span>L&apos;asta si chiude a mezzanotte, tra</span>
+          <span>Bidding closes at midnight UTC, in</span>
           <time dateTime={endsAt} suppressHydrationWarning>
             {left === null ? "--:--:--" : format(left)}
           </time>

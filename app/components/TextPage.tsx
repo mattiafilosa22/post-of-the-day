@@ -8,7 +8,7 @@ export function TextPage({ children }: { children: React.ReactNode }) {
       <Masthead />
       <main className="prose">
         {children}
-        <Link className="back" href="/">Torna alla prima pagina</Link>
+        <Link className="back" href="/">Back to the front page</Link>
       </main>
       <Footer />
     </div>

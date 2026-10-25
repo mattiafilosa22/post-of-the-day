@@ -18,20 +18,21 @@ const schibsted = Schibsted_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Il post del giorno",
-  description: "Ogni giorno un solo post LinkedIn in prima pagina. Lo spazio di domani va all'offerta più alta, e paga solo chi vince.",
+  twitter: { card: "summary_large_image" },
+  title: "The Post of the Day",
+  description: "One post on the front page, every day. Tomorrow's spot goes to the highest bid, and only the winner pays.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   openGraph: {
-    title: "Il post del giorno",
-    description: "Un solo post LinkedIn in prima pagina, ogni giorno. Domani può essere il tuo.",
-    locale: "it_IT",
+    title: "The Post of the Day",
+    description: "One post on the front page, every day. Tomorrow it could be yours.",
+    locale: "en_US",
     type: "website",
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="it" className={`${newsreader.variable} ${schibsted.variable}`}>
+    <html lang="en" className={`${newsreader.variable} ${schibsted.variable}`}>
       <body>{children}</body>
     </html>
   );

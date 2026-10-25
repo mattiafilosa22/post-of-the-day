@@ -2,81 +2,71 @@ import { BidForm } from "./components/BidForm";
 import { Countdown } from "./components/Countdown";
 import { Footer } from "./components/Footer";
 import { Masthead } from "./components/Masthead";
-import { formatEuro } from "@/lib/auction";
+import { PostEmbed } from "./components/PostEmbed";
+import { formatMoney } from "@/lib/auction";
 import { loadFrontPage } from "@/lib/frontpage";
-import { parseLinkedInPost } from "@/lib/linkedin";
-import { formatDayIt } from "@/lib/time";
+import { formatDay } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 
-const timeFmt = new Intl.DateTimeFormat("it-IT", { timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit" });
+const timeFmt = new Intl.DateTimeFormat("en-US", { timeZone: "UTC", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 
 export default async function Home() {
   const fp = await loadFrontPage();
-  const embedUrl = fp.featured ? parseLinkedInPost(fp.featured.post_url)?.embedUrl ?? null : null;
 
   return (
     <div className="page">
-      <Masthead edition={fp.featured ? `Spazio di oggi venduto a ${formatEuro(fp.featured.amount_cents)}` : undefined} />
+      <Masthead edition={fp.featured ? `Today's spot went for ${formatMoney(fp.featured.amount_cents)}` : undefined} />
 
       <main>
         <div className="front">
-          <section className="lead" aria-labelledby="oggi">
-            <p className="kicker">In prima pagina oggi</p>
+          <section className="lead" aria-labelledby="today">
+            <p className="kicker">On the front page today</p>
             {fp.featured ? (
               <>
-                <h2 className="headline" id="oggi">{fp.featured.name}</h2>
+                <h2 className="headline" id="today">{fp.featured.name}</h2>
                 <p className="byline">
                   {fp.featured.headline ? <>{fp.featured.headline} · </> : null}
-                  ha vinto lo spazio con <strong>{formatEuro(fp.featured.amount_cents)}</strong>
+                  won the spot with <strong>{formatMoney(fp.featured.amount_cents)}</strong>
                 </p>
-                {embedUrl && !fp.demo ? (
-                  <iframe className="embed" src={embedUrl} title={`Post LinkedIn di ${fp.featured.name}`} loading="lazy" />
-                ) : (
-                  <div className="empty-slot">
-                    <p className="big">Il post si legge su LinkedIn</p>
-                    <p><a href={fp.featured.post_url} rel="nofollow noopener" target="_blank">Apri il post di {fp.featured.name}</a></p>
-                  </div>
-                )}
+                <PostEmbed url={fp.featured.post_url} name={fp.featured.name} />
               </>
             ) : (
               <>
-                <h2 className="headline" id="oggi">Oggi questo spazio è rimasto vuoto.</h2>
+                <h2 className="headline" id="today">Nobody claimed today&apos;s spot.</h2>
                 <p className="standfirst">
-                  Nessuno ha fatto un&apos;offerta per oggi. Quello di domani è ancora libero: chi offre di più
-                  entro mezzanotte finisce qui, davanti a tutti quelli che passano.
+                  No one bid for today. Tomorrow&apos;s spot is still open: the highest bid by midnight UTC
+                  lands right here, in front of everyone who stops by.
                 </p>
                 <div className="empty-slot">
-                  <p className="big">Domani potresti esserci tu</p>
-                  <p>Bastano il link a un post e un&apos;offerta da {formatEuro(fp.minNextCents)}.</p>
+                  <p className="big">Tomorrow it could be you</p>
+                  <p>All it takes is a link and a bid of {formatMoney(fp.minNextCents)}.</p>
                 </div>
               </>
             )}
           </section>
 
-          <section className="auction" aria-labelledby="domani">
-            <p className="kicker">L&apos;asta di domani</p>
-            <h2 className="headline" id="domani" style={{ fontSize: "1.75rem" }}>
-              <span>{formatDayIt(fp.auctionDay)}</span>
-            </h2>
-            <p className="price-label">{fp.leader ? "Offerta più alta" : "Si parte da"}</p>
-            <p className="price">{formatEuro(fp.leader?.amount_cents ?? fp.minNextCents)}</p>
+          <section className="auction" aria-labelledby="tomorrow">
+            <p className="kicker">Bidding for tomorrow</p>
+            <h2 className="headline" id="tomorrow" style={{ fontSize: "1.75rem" }}>{formatDay(fp.auctionDay)}</h2>
+            <p className="price-label">{fp.leader ? "Highest bid" : "Starting at"}</p>
+            <p className="price">{formatMoney(fp.leader?.amount_cents ?? fp.minNextCents)}</p>
             <p className="leader">
               {fp.leader ? (
-                <>In testa c&apos;è <strong>{fp.leader.name}</strong>. Per superarla servono almeno {formatEuro(fp.minNextCents)}.</>
+                <><strong>{fp.leader.name}</strong> is on top. Beating them takes at least {formatMoney(fp.minNextCents)}.</>
               ) : (
-                <>Nessuna offerta per ora. La prima che arriva va in testa.</>
+                <>No bids yet. The first one takes the lead.</>
               )}
             </p>
             <Countdown endsAt={fp.closesAt} />
-            <BidForm minEuro={fp.minNextCents / 100} />
+            <BidForm minAmount={fp.minNextCents / 100} />
           </section>
         </div>
 
         <div className="columns">
-          <section className="section" aria-labelledby="offerte">
-            <h2 className="section-title" id="offerte">
-              Le offerte di oggi <small>{fp.bids.length} finora</small>
+          <section className="section" aria-labelledby="bids">
+            <h2 className="section-title" id="bids">
+              Today&apos;s bids <small>{fp.bids.length} so far</small>
             </h2>
             {fp.bids.length ? (
               <ol className="ledger">
@@ -84,55 +74,55 @@ export default async function Home() {
                   <li key={b.id} className={b.status === "outbid" ? "is-outbid" : undefined}>
                     <span className="who">
                       {b.name}
-                      {b.status === "leading" ? <span className="tag">In testa</span> : null}
+                      {b.status === "leading" ? <span className="tag">On top</span> : null}
                     </span>
-                    <span className="sum">{formatEuro(b.amount_cents)}</span>
+                    <span className="sum">{formatMoney(b.amount_cents)}</span>
                     <span className="meta">
                       {b.headline ? `${b.headline} · ` : ""}
-                      {b.authorized_at ? `alle ${timeFmt.format(new Date(b.authorized_at))}` : ""}
+                      {b.authorized_at ? `at ${timeFmt.format(new Date(b.authorized_at))} UTC` : ""}
                     </span>
                   </li>
                 ))}
               </ol>
             ) : (
-              <p className="muted">Ancora nessuna. Le offerte compaiono qui appena il pagamento viene autorizzato.</p>
+              <p className="muted">None yet. Bids show up here as soon as the card is authorized.</p>
             )}
           </section>
 
-          <section className="section" aria-labelledby="archivio">
-            <h2 className="section-title" id="archivio">Archivio</h2>
+          <section className="section" aria-labelledby="archive">
+            <h2 className="section-title" id="archive">Archive</h2>
             {fp.archive.length ? (
               <ol className="ledger">
                 {fp.archive.map((b) => (
                   <li key={b.id}>
                     <a className="who" href={b.post_url} rel="nofollow noopener" target="_blank">{b.name}</a>
-                    <span className="sum">{formatEuro(b.amount_cents)}</span>
+                    <span className="sum">{formatMoney(b.amount_cents)}</span>
                     <span className="meta">
-                      {formatDayIt(b.day)}{b.headline ? ` · ${b.headline}` : ""}
+                      {formatDay(b.day)}{b.headline ? ` · ${b.headline}` : ""}
                     </span>
                   </li>
                 ))}
               </ol>
             ) : (
-              <p className="muted">Qui finiranno i post delle edizioni passate.</p>
+              <p className="muted">Past front pages will live here.</p>
             )}
           </section>
         </div>
 
-        <section className="section" aria-labelledby="come">
-          <h2 className="section-title" id="come">Come funziona</h2>
+        <section className="section" aria-labelledby="how">
+          <h2 className="section-title" id="how">How it works</h2>
           <ol className="how">
             <li>
-              <h3>Offri per domani</h3>
-              <p>Incolla il link a un tuo post LinkedIn e scegli quanto offrire. Ogni rilancio deve superare il precedente di almeno 1 €.</p>
+              <h3>Bid for tomorrow</h3>
+              <p>Paste a link to your post and choose your bid. Every new bid has to beat the top one by at least $1.</p>
             </li>
             <li>
-              <h3>Paghi solo se vinci</h3>
-              <p>L&apos;importo viene bloccato, non addebitato. Se qualcuno ti supera, il blocco viene rilasciato e puoi rilanciare.</p>
+              <h3>Only the winner pays</h3>
+              <p>Your card is authorized, not charged. If someone outbids you, the hold is released and you can bid again.</p>
             </li>
             <li>
-              <h3>Un giorno in prima pagina</h3>
-              <p>A mezzanotte l&apos;offerta più alta vince: il suo post resta qui tutto il giorno e poi entra nell&apos;archivio.</p>
+              <h3>One day on the front page</h3>
+              <p>At midnight UTC the highest bid wins. That post stays here all day, then moves to the archive.</p>
             </li>
           </ol>
         </section>
